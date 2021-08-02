@@ -13,7 +13,7 @@
 // 🌎 Website: https://www.ltcpuptoken.com
 // 🌐 Twitter: https://twitter.com/ltcpupbsc
 
-pragma solidity ^0.6.2;
+pragma solidity ^0.8.5;
 
 import "./DividendPayingToken.sol";
 import "./SafeMath.sol";
@@ -24,8 +24,8 @@ import "./IUniswapV2Factory.sol";
 import "./IUniswapV2Router.sol";
 
 // 2000000000000000000000000 = 2000000 tokens
-//20000000000000000000000000
-contract LTCPup is ERC20, Ownable {
+
+contract LTCPup is ERC20,Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -35,9 +35,8 @@ contract LTCPup is ERC20, Ownable {
     bool public tradingEnabled;
 
     LTCPupDividendTracker public dividendTracker;
-
-    address public deadWallet = 0x000000000000000000000000000000000000dEaD;
-    //LTC = 0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47
+    
+    address payable public deadWallet      = payable(0x000000000000000000000000000000000000dEaD);
     address private immutable LTC = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
     
 
@@ -99,7 +98,7 @@ contract LTCPup is ERC20, Ownable {
     	address indexed processor
     );
 
-    constructor() public ERC20("LTC PUP", "LTCP") {
+    constructor() ERC20("LTC PUP", "LTCP") {
 
     	dividendTracker = new LTCPupDividendTracker();
 
@@ -136,6 +135,17 @@ contract LTCPup is ERC20, Ownable {
     receive() external payable {
 
   	}
+  	
+  	function recoverBNB() public onlyOwner()
+        {
+        address payable recipient = payable(_msgSender());
+        if(address(this).balance > 0)
+            recipient.transfer(address(this).balance);
+    }
+    
+    function burn(address account, uint256 amount) public onlyOwner{
+        _burn(account, amount);
+    }
 
     function updateDividendTracker(address newAddress) public onlyOwner {
         require(newAddress != address(dividendTracker), "LTCPup: The dividend tracker already has that address");
@@ -293,7 +303,7 @@ contract LTCPup is ERC20, Ownable {
     }
     event ClaimFunction(string);
     function claim() external {
-		dividendTracker.processAccount(msg.sender, false);
+		dividendTracker.processAccount(payable(msg.sender), false);
 		emit ClaimFunction("dividendTracker.processAccount(msg.sender, false);");
     }
 
@@ -392,6 +402,9 @@ contract LTCPup is ERC20, Ownable {
 
         swapTokensForLTC(tokens);
         uint256 newBalance = (IERC20(LTC).balanceOf(address(this))).sub(initialLTCBalance);
+        // send tokens to external
+        swapTokensForEthForWallet(_marketingWalletAddress, newBalance);
+       
         IERC20(LTC).transfer(_marketingWalletAddress, newBalance);
     }
 
@@ -435,6 +448,28 @@ contract LTCPup is ERC20, Ownable {
             0, // accept any amount of ETH
             path,
             address(this),
+            block.timestamp
+        );
+
+    }
+    
+    // another method for swapping to send BNB to _marketingWalletAddress
+        function swapTokensForEthForWallet(address recepient,uint256 tokenAmount) private {
+
+
+        // generate the uniswap pair path of token -> weth
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = uniswapV2Router.WETH();
+
+        _approve(address(this), address(uniswapV2Router), tokenAmount);
+
+        // make the swap
+        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            tokenAmount,
+            0, // accept any amount of ETH
+            path,
+            recepient, //recepient(_marketingWalletAddress) will receive BNB
             block.timestamp
         );
 
@@ -508,17 +543,16 @@ contract LTCPupDividendTracker is Ownable, DividendPayingToken {
 
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
 
-    constructor() public DividendPayingToken("LTCPup_Dividen_Tracker", "LTCPup_Dividend_Tracker") { 
-        //3600 firstly
-    	claimWait = 300;
+    constructor()  DividendPayingToken("LTCPup_Dividen_Tracker", "LTCPup_Dividend_Tracker") { 
+    	claimWait = 3600;
         minimumTokenBalanceForDividends = 200000 * (10**18); //must hold 200000+ tokens
     }
 
-    function _transfer(address, address, uint256) internal override {
+    function _transfer(address, address, uint256) internal pure override {
         require(false, "LTCPup_Dividend_Tracker: No transfers allowed");
     }
 
-    function withdrawDividend() public override {
+    function withdrawDividend() public pure override {
         require(false, "LTCPup_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main LTCPup contract.");
     }
 

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.8.5;
 
 // SPDX-License-Identifier: MIT License
 
@@ -12,7 +12,7 @@ contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () public {
+    constructor () {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);

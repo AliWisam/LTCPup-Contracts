@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.2;
+pragma solidity ^0.8.5;
 
 import "./ERC20.sol";
 import "./SafeMath.sol";
@@ -20,7 +20,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   using SafeMath for uint256;
   using SafeMathUint for uint256;
   using SafeMathInt for int256; 
-//0x2C5c163b09C36fA547Fa2E163c8fF739FDDE1aFD
+
   address public immutable LTC = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
 
 
@@ -47,7 +47,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
 
   uint256 public totalDividendsDistributed;
 
-  constructor(string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
+  constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
 
   }
 
@@ -68,7 +68,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   /// @notice Withdraws the ether distributed to the sender.
   /// @dev It emits a `DividendWithdrawn` event if the amount of withdrawn ether is greater than 0.
   function withdrawDividend() public virtual override {
-    _withdrawDividendOfUser(msg.sender);
+    _withdrawDividendOfUser(payable(msg.sender));
   }
 
   /// @notice Withdraws the ether distributed to the sender.
