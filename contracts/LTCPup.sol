@@ -38,7 +38,7 @@ contract LTCPup is ERC20, Ownable {
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
     //LTC = 0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47
-    address private LTC = address(0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47); //BUSD
+    address private immutable LTC = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
     
 
     uint256 public swapTokensAtAmount = 2000000 * (10**18);
