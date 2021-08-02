@@ -3,4 +3,6 @@ node_modules
 #Hardhat files
 cache
 artifacts
-.secrets
+.secrets.json
+node_modules
+secrets
