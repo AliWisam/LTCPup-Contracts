@@ -21,7 +21,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   using SafeMathUint for uint256;
   using SafeMathInt for int256; 
 //0x2C5c163b09C36fA547Fa2E163c8fF739FDDE1aFD
-  address public immutable LTC = address(0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47); //BUSD
+  address public immutable LTC = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
 
 
   // With `magnitude`, we can properly distribute dividends even if the amount of received ether is small.
